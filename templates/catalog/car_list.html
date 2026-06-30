@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Used Cars for Export — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-brand-50 border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <p class="font-mono text-xs tracking-eyebrow uppercase text-muted"><a href="{% url 'core:home' %}" class="hover:text-brand">Home</a> / Cars</p>
+    <h1 class="font-display font-700 text-3xl text-ink mt-2">Japanese used cars for export</h1>
+    <p class="text-muted mt-1">Graded, photographed and priced FOB · CIF. Filter the live inventory below.</p>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid lg:grid-cols-12 gap-8">
+  <!-- Filters -->
+  <aside class="lg:col-span-3" x-data="{open:false}">
+    <button @click="open=!open" class="lg:hidden w-full mb-4 flex items-center justify-between bg-surface sheet rounded-lg px-4 py-3 font-600">
+      Filters <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+    </button>
+    <form id="filter-form" method="get" action="{% url 'catalog:car_list' %}"
+          hx-get="{% url 'catalog:car_list' %}" hx-target="#car-results" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="change, keyup changed delay:450ms, submit"
+          hx-indicator="#results-loading"
+          :class="open ? 'block' : 'hidden lg:block'"
+          class="lg:sticky lg:top-20 bg-surface sheet rounded-xl2 p-5 space-y-5">
+      <div class="flex items-center justify-between">
+        <h2 class="font-display font-600 text-ink">Refine</h2>
+        <a href="{% url 'catalog:car_list' %}" class="text-xs text-accent hover:underline">Clear all</a>
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Keyword</label>
+        <input name="q" value="{{ current.q }}" placeholder="Make, model, stock #"
+               class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400">
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Brand</label>
+        <select name="brand" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none">
+          <option value="">Any brand</option>
+          {% for b in brands %}<option value="{{ b.slug }}" {% if current.brand == b.slug %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Category</label>
+        <select name="category" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none">
+          <option value="">Any type</option>
+          {% for c in categories %}<option value="{{ c.slug }}" {% if current.category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Fuel</label>
+          <select name="fuel" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none">
+            <option value="">Any</option>
+            {% for v,label in fuels %}<option value="{{ v }}" {% if current.fuel == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Trans.</label>
+          <select name="transmission" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none">
+            <option value="">Any</option>
+            {% for v,label in transmissions %}<option value="{{ v }}" {% if current.transmission == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Year range</label>
+        <div class="flex items-center gap-2">
+          <input name="year_min" value="{{ current.year_min }}" type="number" placeholder="From" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm font-mono outline-none">
+          <span class="text-muted">–</span>
+          <input name="year_max" value="{{ current.year_max }}" type="number" placeholder="To" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm font-mono outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Price range (USD)</label>
+        <div class="flex items-center gap-2">
+          <input name="price_min" value="{{ current.price_min }}" type="number" placeholder="Min" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm font-mono outline-none">
+          <span class="text-muted">–</span>
+          <input name="price_max" value="{{ current.price_max }}" type="number" placeholder="Max" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm font-mono outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-600 text-muted uppercase tracking-wide mb-1.5">Steering</label>
+        <div class="flex gap-2">
+          <label class="flex-1 text-center text-sm py-2 rounded-lg bg-paper cursor-pointer has-[:checked]:bg-brand has-[:checked]:text-white">
+            <input type="radio" name="steering" value="" class="hidden" {% if not current.steering %}checked{% endif %}>Any</label>
+          <label class="flex-1 text-center text-sm py-2 rounded-lg bg-paper cursor-pointer has-[:checked]:bg-brand has-[:checked]:text-white">
+            <input type="radio" name="steering" value="Right" class="hidden" {% if current.steering == 'Right' %}checked{% endif %}>RHD</label>
+          <label class="flex-1 text-center text-sm py-2 rounded-lg bg-paper cursor-pointer has-[:checked]:bg-brand has-[:checked]:text-white">
+            <input type="radio" name="steering" value="Left" class="hidden" {% if current.steering == 'Left' %}checked{% endif %}>LHD</label>
+        </div>
+      </div>
+
+      <button class="w-full bg-brand hover:bg-brand-600 text-white font-600 py-2.5 rounded-lg lg:hidden">Apply filters</button>
+    </form>
+  </aside>
+
+  <!-- Results -->
+  <div class="lg:col-span-9 relative">
+    <div id="results-loading" class="htmx-indicator absolute inset-0 z-10 bg-paper/60 backdrop-blur-sm grid place-items-center rounded-xl2">
+      <span class="font-mono text-sm text-brand animate-pulse">Loading stock…</span>
+    </div>
+    {% include "catalog/_car_results.html" %}
+  </div>
+</div>
+<style>.htmx-indicator{opacity:0;pointer-events:none;transition:opacity .2s}.htmx-request #results-loading,#results-loading.htmx-request{opacity:1;pointer-events:auto}</style>
+{% endblock %}

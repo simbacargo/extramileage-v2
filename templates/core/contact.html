@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Contact — {{ site.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid lg:grid-cols-12 gap-10">
+  <div class="lg:col-span-5">
+    <p class="flex items-center gap-2 font-mono text-xs tracking-eyebrow uppercase text-muted"><span class="sun-dot"></span> Get in touch</p>
+    <h1 class="font-display font-700 text-4xl text-ink mt-4">Let's get your vehicle moving</h1>
+    <p class="text-muted mt-3 leading-relaxed">Questions about stock, pricing or shipping to your country? Send a message and our team will respond within one business day.</p>
+
+    <div class="mt-8 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-50 text-brand grid place-items-center shrink-0">✆</span>
+        <div><p class="text-xs uppercase tracking-wide text-muted">Phone / WhatsApp</p><a href="tel:{{ site.contact_phone }}" class="font-mono text-ink hover:text-brand">{{ site.contact_phone }}</a></div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-50 text-brand grid place-items-center shrink-0">✉</span>
+        <div><p class="text-xs uppercase tracking-wide text-muted">Email</p><a href="mailto:{{ site.contact_email }}" class="font-mono text-ink hover:text-brand">{{ site.contact_email }}</a></div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-50 text-brand grid place-items-center shrink-0">⌖</span>
+        <div><p class="text-xs uppercase tracking-wide text-muted">Head office</p><p class="text-ink">{{ site.company_address }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <form method="post" class="lg:col-span-7 bg-surface sheet rounded-xl2 p-6 shadow-card grid sm:grid-cols-2 gap-4 self-start">
+    {% csrf_token %}
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Name</label><input name="name" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Email</label><input type="email" name="email" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Phone</label><input name="phone" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Country</label><input name="country" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div class="sm:col-span-2"><label class="block text-xs font-600 text-muted uppercase mb-1.5">Subject</label><input name="subject" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div class="sm:col-span-2"><label class="block text-xs font-600 text-muted uppercase mb-1.5">Message</label><textarea name="message" rows="5" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></textarea></div>
+    <button class="sm:col-span-2 bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Send message</button>
+  </form>
+</div>
+{% endblock %}

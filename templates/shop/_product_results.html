@@ -1,0 +1,32 @@
+{% load humanize %}
+<div id="product-results">
+  <div class="flex items-center justify-between mb-4">
+    <p class="text-sm text-muted"><span class="font-mono font-600 text-ink">{{ total|intcomma }}</span> item{{ total|pluralize }}</p>
+    <select name="sort" form="pfilter-form" hx-get="{% url 'shop:product_list' %}" hx-target="#product-results"
+            hx-swap="outerHTML" hx-push-url="true" hx-include="#pfilter-form"
+            class="bg-surface sheet rounded-lg px-3 py-2 text-sm outline-none">
+      <option value="newest" {% if current.sort == 'newest' %}selected{% endif %}>Newest</option>
+      <option value="price_low" {% if current.sort == 'price_low' %}selected{% endif %}>Price ↑</option>
+      <option value="price_high" {% if current.sort == 'price_high' %}selected{% endif %}>Price ↓</option>
+      <option value="popular" {% if current.sort == 'popular' %}selected{% endif %}>Most viewed</option>
+    </select>
+  </div>
+  {% if page_obj %}
+  <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+    {% for product in page_obj %}{% include "shop/_product_card.html" %}{% endfor %}
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-10 flex items-center justify-center gap-1.5 font-mono text-sm">
+    {% for n in page_obj.paginator.page_range %}
+      {% if n == page_obj.number %}<span class="px-3.5 py-2 rounded-lg bg-brand text-white">{{ n }}</span>
+      {% else %}<a hx-get="?{{ querystring }}&page={{ n }}" hx-target="#product-results" hx-push-url="true" href="?{{ querystring }}&page={{ n }}" class="px-3.5 py-2 rounded-lg sheet bg-surface hover:border-brand">{{ n }}</a>{% endif %}
+    {% endfor %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-24 sheet rounded-xl2 bg-surface">
+    <p class="font-display font-600 text-xl text-ink">Nothing here yet</p>
+    <p class="text-muted mt-2">Try a different category or clear filters.</p>
+  </div>
+  {% endif %}
+</div>

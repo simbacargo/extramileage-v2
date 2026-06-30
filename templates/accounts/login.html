@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign in — {{ site.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+  <div class="text-center mb-8">
+    <span class="sun-dot inline-block"></span>
+    <h1 class="font-display font-700 text-3xl text-ink mt-4">Welcome back</h1>
+    <p class="text-muted mt-1">Sign in to manage saved vehicles and bids.</p>
+  </div>
+  <form method="post" class="bg-surface sheet rounded-xl2 p-6 shadow-card space-y-4">
+    {% csrf_token %}
+    {% if form.errors %}<div class="bg-accent-50 border border-accent/30 text-accent-600 text-sm rounded-lg px-4 py-3">Incorrect username or password.</div>{% endif %}
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Username</label>
+      <input name="username" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Password</label>
+      <input name="password" type="password" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    <button class="w-full bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Sign in</button>
+    <p class="text-center text-sm text-muted">No account? <a href="{% url 'accounts:register' %}" class="text-brand font-600 hover:text-accent">Create one</a></p>
+  </form>
+</div>
+{% endblock %}

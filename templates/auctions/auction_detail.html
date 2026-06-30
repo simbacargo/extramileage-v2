@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ auction.title }} — Live Auction | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+  <p class="font-mono text-xs tracking-eyebrow uppercase text-muted mb-5">
+    <a href="{% url 'core:home' %}" class="hover:text-brand">Home</a> /
+    <a href="{% url 'auctions:list' %}" class="hover:text-brand">Auctions</a> /
+    <span class="text-ink">{{ auction.title }}</span>
+  </p>
+
+  <div class="grid lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-7">
+      <div class="relative bg-paper sheet rounded-xl2 overflow-hidden aspect-[16/10]">
+        {% if auction.url %}<img src="{{ auction.url }}" alt="{{ auction.title }}" class="w-full h-full object-cover">
+        {% else %}<div class="w-full h-full grid place-items-center text-muted font-mono">NO IMAGE</div>{% endif %}
+      </div>
+      <h1 class="font-display font-700 text-3xl text-ink mt-6">{{ auction.title }}</h1>
+      {% if auction.description %}<p class="mt-3 text-muted leading-relaxed whitespace-pre-line">{{ auction.description }}</p>{% endif %}
+      {% if auction.car %}
+      <a href="{{ auction.car.get_absolute_url }}" class="mt-5 inline-flex items-center gap-3 sheet rounded-xl p-3 bg-surface hover:border-brand">
+        {% with img=auction.car.primary_image %}{% if img %}<img src="{{ img.url }}" class="w-16 h-16 rounded-lg object-cover">{% endif %}{% endwith %}
+        <span><span class="block text-xs text-muted font-mono">VIEW FULL LISTING</span><span class="block font-600 text-ink">{{ auction.car.title }}</span></span>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="lg:col-span-5">
+      <div class="lg:sticky lg:top-20 space-y-5" hx-ext="ws" ws-connect="/ws/auctions/{{ auction.slug }}/">
+        {% include "auctions/_bid_panel.html" %}
+
+        <!-- Bid form -->
+        <div class="bg-surface sheet rounded-xl2 p-6">
+          {% if user.is_authenticated %}
+            {% if auction.computed_status == 'live' %}
+            <form hx-post="{% url 'auctions:bid' auction.slug %}" hx-target="#bid-panel" hx-swap="outerHTML"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'>
+              <label class="block text-xs font-600 text-muted uppercase mb-1.5">Your bid (USD)</label>
+              <div class="flex gap-2">
+                <div class="flex-1 flex items-center bg-paper rounded-lg px-3">
+                  <span class="text-muted font-mono">$</span>
+                  <input name="amount" type="number" step="1" min="{{ auction.next_min_bid|floatformat:0 }}"
+                         value="{{ auction.next_min_bid|floatformat:0 }}"
+                         class="w-full bg-transparent py-3 font-mono outline-none">
+                </div>
+                <button class="bg-accent hover:bg-accent-600 text-white font-600 px-6 rounded-lg">Bid</button>
+              </div>
+              <p class="mt-2 text-xs text-muted">Enter at least <span class="font-mono">${{ auction.next_min_bid|floatformat:0|intcomma }}</span>. Bids are binding.</p>
+            </form>
+            {% else %}
+            <p class="text-center text-muted text-sm">{% if auction.computed_status == 'ended' %}This auction has ended.{% else %}Bidding hasn't opened yet.{% endif %}</p>
+            {% endif %}
+          {% else %}
+            <p class="text-sm text-muted mb-3">Sign in to place a bid.</p>
+            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="block text-center bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Sign in to bid</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% load humanize %}
+<style>
+  #site-header{ transition: box-shadow .3s ease, background .3s ease; background: rgba(255,255,255,.82); backdrop-filter: blur(12px); }
+  #site-header.scrolled{ box-shadow: 0 1px 0 #E6E9EE, 0 8px 30px rgba(12,20,34,.06); }
+</style>
+<header id="site-header" class="sticky top-0 z-50 border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="h-16 flex items-center justify-between gap-4"
+         x-data="{open:false, acct:false}">
+
+      <!-- Logo -->
+      <a href="{% url 'core:home' %}" class="flex items-center gap-2.5 shrink-0">
+        <span class="sun-dot"></span>
+        <span class="leading-none">
+          <span class="font-display font-700 text-[1.05rem] tracking-tight text-ink block">EXTRA MILEAGE</span>
+          <span class="font-mono text-[.6rem] tracking-[.34em] text-muted uppercase">Logistics · Japan</span>
+        </span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-500 text-ink/80">
+        <a href="{% url 'catalog:car_list' %}" class="underline-link py-1">Cars</a>
+        <a href="{% url 'shop:product_list' %}" class="underline-link py-1">Parts</a>
+        <a href="{% url 'auctions:list' %}" class="underline-link py-1 flex items-center gap-1.5">
+          Auctions <span class="live-dot w-1.5 h-1.5 rounded-full bg-accent"></span>
+        </a>
+        <a href="{% url 'core:about' %}" class="underline-link py-1">About</a>
+        <a href="{% url 'core:contact' %}" class="underline-link py-1">Contact</a>
+      </nav>
+
+      <!-- Right -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="{% url 'catalog:car_list' %}" class="hidden sm:flex items-center gap-2 text-sm text-muted hover:text-ink px-3 py-2 rounded-lg border border-line bg-surface">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <span class="hidden md:inline">Search stock</span>
+        </a>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:wishlist' %}" class="relative p-2 rounded-lg hover:bg-paper" title="Saved">
+            <svg class="w-5 h-5 text-ink" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.04 3 5.5l7 7Z"/></svg>
+            {% if wishlist_count %}<span class="absolute -top-0.5 -right-0.5 bg-accent text-white text-[10px] font-600 rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ wishlist_count }}</span>{% endif %}
+          </a>
+          <div class="relative" @click.outside="acct=false">
+            <button @click="acct=!acct" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-line bg-surface hover:shadow-card">
+              <span class="w-7 h-7 rounded-full bg-brand text-white text-xs font-600 flex items-center justify-center font-mono">{{ user.initials }}</span>
+              <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div x-show="acct" x-transition x-cloak class="absolute right-0 mt-2 w-52 bg-surface sheet rounded-xl shadow-lift py-1.5 text-sm">
+              <div class="px-4 py-2 border-b border-line">
+                <p class="font-600 text-ink truncate">{{ user.display_name }}</p>
+                <p class="text-xs text-muted truncate">{{ user.email }}</p>
+              </div>
+              <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 hover:bg-paper">Dashboard</a>
+              <a href="{% url 'accounts:wishlist' %}" class="block px-4 py-2 hover:bg-paper">Saved vehicles</a>
+              <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 hover:bg-paper">Profile</a>
+              <form method="post" action="{% url 'accounts:logout' %}" class="border-t border-line mt-1 pt-1">
+                {% csrf_token %}
+                <button class="w-full text-left px-4 py-2 hover:bg-paper text-accent">Sign out</button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="hidden sm:inline text-sm font-500 text-ink px-3 py-2 hover:text-brand">Sign in</a>
+          <a href="{% url 'accounts:register' %}" class="text-sm font-600 text-white bg-brand hover:bg-brand-600 px-4 py-2 rounded-lg">Register</a>
+        {% endif %}
+
+        <button @click="open=!open" class="lg:hidden p-2 rounded-lg hover:bg-paper" aria-label="Menu">
+          <svg class="w-6 h-6 text-ink" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+
+      <!-- Mobile menu -->
+      <div x-show="open" x-transition x-cloak class="absolute top-16 inset-x-0 bg-surface border-b border-line shadow-lift lg:hidden px-6 py-4 space-y-1">
+        <a href="{% url 'catalog:car_list' %}" class="block py-2.5 font-500">Cars</a>
+        <a href="{% url 'shop:product_list' %}" class="block py-2.5 font-500">Parts</a>
+        <a href="{% url 'auctions:list' %}" class="block py-2.5 font-500">Auctions</a>
+        <a href="{% url 'core:about' %}" class="block py-2.5 font-500">About</a>
+        <a href="{% url 'core:contact' %}" class="block py-2.5 font-500">Contact</a>
+        {% if not user.is_authenticated %}
+          <a href="{% url 'accounts:login' %}" class="block py-2.5 font-500 text-brand">Sign in</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</header>
+<style>[x-cloak]{display:none!important}</style>

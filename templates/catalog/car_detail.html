@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ car.title }} — Stock #{{ car.stock_id }} | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+  <p class="font-mono text-xs tracking-eyebrow uppercase text-muted mb-5">
+    <a href="{% url 'core:home' %}" class="hover:text-brand">Home</a> /
+    <a href="{% url 'catalog:car_list' %}" class="hover:text-brand">Cars</a> /
+    <span class="text-ink">{{ car.make }} {{ car.model }}</span>
+  </p>
+
+  <div class="grid lg:grid-cols-12 gap-8">
+    <!-- Gallery -->
+    <div class="lg:col-span-7" x-data="{active:0, images: {{ car.images.count }} }">
+      <div class="relative bg-paper sheet rounded-xl2 overflow-hidden aspect-[16/11]">
+        {% for img in car.images.all %}
+        <img x-show="active === {{ forloop.counter0 }}" x-transition.opacity src="{{ img.url }}" alt="{{ car.title }}"
+             class="w-full h-full object-cover" {% if not forloop.first %}x-cloak{% endif %}>
+        {% empty %}
+        <div class="w-full h-full grid place-items-center text-muted font-mono">NO IMAGE</div>
+        {% endfor %}
+        <span class="absolute top-4 left-4 font-mono text-xs bg-ink/85 text-white px-2.5 py-1.5 rounded-md">#{{ car.stock_id }}</span>
+        {% if car.images.count > 1 %}
+        <button @click="active=(active-1+images)%images" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-full bg-white/90 sheet hover:bg-white">‹</button>
+        <button @click="active=(active+1)%images" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-full bg-white/90 sheet hover:bg-white">›</button>
+        {% endif %}
+      </div>
+      {% if car.images.count > 1 %}
+      <div class="mt-3 grid grid-cols-5 sm:grid-cols-6 gap-2">
+        {% for img in car.images.all %}
+        <button @click="active={{ forloop.counter0 }}" :class="active==={{ forloop.counter0 }} ? 'ring-2 ring-brand' : 'opacity-70 hover:opacity-100'"
+                class="aspect-square rounded-lg overflow-hidden bg-paper sheet">
+          <img src="{{ img.url }}" alt="" class="w-full h-full object-cover">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Description -->
+      {% if car.description %}
+      <div class="mt-8">
+        <h2 class="font-display font-700 text-xl text-ink">Description</h2>
+        <p class="mt-3 text-muted leading-relaxed whitespace-pre-line">{{ car.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if car.feature_list %}
+      <div class="mt-8">
+        <h2 class="font-display font-700 text-xl text-ink mb-3">Equipment & features</h2>
+        <div class="grid sm:grid-cols-2 gap-2">
+          {% for f in car.feature_list %}
+          <div class="flex items-center gap-2.5 text-sm text-ink"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span>{{ f }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Buy panel -->
+    <div class="lg:col-span-5">
+      <div class="lg:sticky lg:top-20 space-y-5">
+        <div class="bg-surface sheet rounded-xl2 p-6 shadow-card">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-mono text-[.7rem] tracking-[.12em] uppercase text-brand-400">{{ car.brand.name|default:car.make }} · {{ car.year }}</p>
+              <h1 class="font-display font-700 text-2xl text-ink mt-1">{{ car.title }}</h1>
+            </div>
+            {% include "accounts/_wishlist_button.html" with active=in_wishlist kind="car" obj_id=car.id %}
+          </div>
+
+          <div class="mt-5 grid grid-cols-2 gap-px bg-line sheet rounded-xl overflow-hidden">
+            <div class="bg-surface p-4">
+              <p class="text-[.62rem] text-muted uppercase tracking-eyebrow">FOB Price</p>
+              <p class="font-mono font-600 text-xl text-ink">${{ car.fob_price|default:car.price|floatformat:0|intcomma }}</p>
+            </div>
+            <div class="bg-brand p-4 text-white">
+              <p class="text-[.62rem] text-white/70 uppercase tracking-eyebrow">CIF Price</p>
+              <p class="font-mono font-700 text-xl">${{ car.cif_price|default:car.price|floatformat:0|intcomma }}</p>
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-col gap-2.5">
+            <a href="#inquire" class="bg-accent hover:bg-accent-600 text-white text-center font-600 py-3 rounded-lg">Request quote / inquire</a>
+            <a href="https://wa.me/{{ site.whatsapp_number|cut:' '|cut:'+'|cut:'('|cut:')'|cut:'-' }}?text=Hi, I'm interested in stock #{{ car.stock_id }} ({{ car.title }})"
+               target="_blank" rel="noopener"
+               class="border border-line hover:border-brand text-center font-600 py-3 rounded-lg text-ink">Chat on WhatsApp</a>
+          </div>
+        </div>
+
+        <!-- Auction-style spec sheet -->
+        <div class="bg-surface sheet rounded-xl2 overflow-hidden">
+          <div class="px-5 py-3 border-b border-line flex items-center justify-between">
+            <h3 class="font-display font-600 text-ink">Inspection sheet</h3>
+            <span class="font-mono text-[.66rem] text-muted">REF #{{ car.stock_id }}</span>
+          </div>
+          <dl class="font-mono text-sm">
+            {% for label, value in spec_rows %}
+            <div class="grid grid-cols-2 {% if not forloop.first %}sheet-row{% endif %}">
+              <dt class="px-5 py-2.5 text-muted">{{ label }}</dt>
+              <dd class="px-5 py-2.5 text-right text-ink">{{ value }}</dd>
+            </div>
+            {% endfor %}
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inquiry -->
+  <div id="inquire" class="mt-14 grid lg:grid-cols-12 gap-8 scroll-mt-20">
+    <div class="lg:col-span-5">
+      <p class="font-mono text-[.7rem] tracking-[.2em] uppercase text-accent">Interested?</p>
+      <h2 class="font-display font-700 text-3xl text-ink mt-1">Inquire about this unit</h2>
+      <p class="text-muted mt-3 leading-relaxed">Send us your details and we'll confirm availability, total CIF cost to your port, and shipping schedule — usually within one business day.</p>
+      <div class="mt-6 sheet rounded-xl p-5 bg-paper font-mono text-sm space-y-2">
+        <p><span class="text-muted">Stock</span> <span class="text-ink float-right">#{{ car.stock_id }}</span></p>
+        <p><span class="text-muted">Unit</span> <span class="text-ink float-right">{{ car.title }}</span></p>
+        <p><span class="text-muted">CIF</span> <span class="text-ink float-right">${{ car.cif_price|default:car.price|floatformat:0|intcomma }}</span></p>
+      </div>
+    </div>
+    <form method="post" action="{% url 'core:contact' %}" class="lg:col-span-7 bg-surface sheet rounded-xl2 p-6 grid sm:grid-cols-2 gap-4">
+      {% csrf_token %}
+      <input type="hidden" name="car_id" value="{{ car.id }}">
+      <input type="hidden" name="subject" value="Inquiry: #{{ car.stock_id }} {{ car.title }}">
+      <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Name</label><input name="name" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+      <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Email</label><input type="email" name="email" required class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+      <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Phone</label><input name="phone" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+      <div><label class="block text-xs font-600 text-muted uppercase mb-1.5">Destination country</label><input name="country" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400"></div>
+      <div class="sm:col-span-2"><label class="block text-xs font-600 text-muted uppercase mb-1.5">Message</label><textarea name="message" rows="4" class="w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400">I'm interested in stock #{{ car.stock_id }} ({{ car.title }}). Please send total CIF cost and shipping details.</textarea></div>
+      <button class="sm:col-span-2 bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Send inquiry</button>
+    </form>
+  </div>
+
+  <!-- Related -->
+  {% if related %}
+  <div class="mt-16">
+    <h2 class="font-display font-700 text-2xl text-ink mb-6">Similar vehicles</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {% for car in related %}{% include "catalog/_car_card.html" %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

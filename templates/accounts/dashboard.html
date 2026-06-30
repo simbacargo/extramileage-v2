@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Dashboard — {{ site.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <div class="flex items-center gap-4">
+    <span class="w-14 h-14 rounded-full bg-brand text-white grid place-items-center font-mono text-lg">{{ user.initials }}</span>
+    <div>
+      <h1 class="font-display font-700 text-2xl text-ink">Hi, {{ user.display_name }}</h1>
+      <p class="text-muted text-sm">{{ user.email }}{% if user.country %} · {{ user.country }}{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="mt-8 grid sm:grid-cols-3 gap-4">
+    <div class="bg-surface sheet rounded-xl2 p-5"><p class="font-mono font-700 text-3xl text-ink">{{ saved_cars_count }}</p><p class="text-sm text-muted">Saved vehicles</p></div>
+    <div class="bg-surface sheet rounded-xl2 p-5"><p class="font-mono font-700 text-3xl text-ink">{{ inquiries.count }}</p><p class="text-sm text-muted">Inquiries sent</p></div>
+    <div class="bg-surface sheet rounded-xl2 p-5"><p class="font-mono font-700 text-3xl text-ink">{{ bids.count }}</p><p class="text-sm text-muted">Bids placed</p></div>
+  </div>
+
+  <div class="mt-10 grid lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-display font-700 text-xl text-ink">Saved vehicles</h2>
+        <a href="{% url 'accounts:wishlist' %}" class="text-sm font-600 text-brand hover:text-accent">View all →</a>
+      </div>
+      {% if saved_cars %}
+      <div class="grid sm:grid-cols-2 gap-5">{% for item in saved_cars %}{% include "catalog/_car_card.html" with car=item.car wished=True %}{% endfor %}</div>
+      {% else %}
+      <div class="sheet rounded-xl2 bg-surface p-10 text-center"><p class="text-muted">No saved vehicles yet.</p><a href="{% url 'catalog:car_list' %}" class="inline-block mt-4 bg-brand text-white font-600 px-5 py-2.5 rounded-lg">Browse cars</a></div>
+      {% endif %}
+    </div>
+
+    <div class="space-y-8">
+      <div>
+        <h2 class="font-display font-700 text-xl text-ink mb-4">Recent inquiries</h2>
+        <div class="bg-surface sheet rounded-xl2 divide-y divide-line">
+          {% for q in inquiries %}
+          <div class="p-4"><p class="font-600 text-sm text-ink truncate">{{ q.subject|default:"General inquiry" }}</p><p class="text-xs text-muted font-mono mt-1">{{ q.created|date:"d M Y" }} · {{ q.get_status_display }}</p></div>
+          {% empty %}<p class="p-6 text-center text-muted text-sm">No inquiries yet.</p>{% endfor %}
+        </div>
+      </div>
+      <div>
+        <h2 class="font-display font-700 text-xl text-ink mb-4">Recent bids</h2>
+        <div class="bg-surface sheet rounded-xl2 divide-y divide-line">
+          {% for b in bids %}
+          <a href="{{ b.auction.get_absolute_url }}" class="block p-4 hover:bg-paper"><p class="font-600 text-sm text-ink truncate">{{ b.auction.title }}</p><p class="text-xs font-mono text-muted mt-1">${{ b.amount|floatformat:0|intcomma }} · {{ b.created|date:"d M" }}</p></a>
+          {% empty %}<p class="p-6 text-center text-muted text-sm">No bids yet.</p>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

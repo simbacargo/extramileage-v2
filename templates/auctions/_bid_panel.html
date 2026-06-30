@@ -1,0 +1,45 @@
+{% load humanize %}
+<div id="bid-panel"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if error %}
+  <div class="mb-4 bg-accent-50 border border-accent/30 text-accent-600 text-sm rounded-lg px-4 py-3">{{ error }}</div>
+  {% endif %}
+
+  <div class="bg-surface sheet rounded-xl2 p-6 shadow-card">
+    <div class="flex items-center justify-between">
+      {% if auction.computed_status == 'live' %}
+      <span class="flex items-center gap-2 font-mono text-[.66rem] uppercase tracking-wide text-emerald-600"><span class="live-dot w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Live now</span>
+      {% elif auction.computed_status == 'scheduled' %}
+      <span class="font-mono text-[.66rem] uppercase tracking-wide text-brand-400">Starts soon</span>
+      {% else %}
+      <span class="font-mono text-[.66rem] uppercase tracking-wide text-muted">Auction ended</span>
+      {% endif %}
+      <span class="font-mono text-xs text-accent" data-countdown="{{ auction.end_date|date:'c' }}">—</span>
+    </div>
+
+    <p class="mt-4 text-[.62rem] text-muted uppercase tracking-eyebrow">Current bid</p>
+    <p class="font-mono font-700 text-4xl text-ink">${{ auction.current_bid|floatformat:0|intcomma }}</p>
+    <div class="mt-2 flex items-center gap-4 text-sm text-muted font-mono">
+      <span>{{ auction.total_bids }} bid{{ auction.total_bids|pluralize }}</span>
+      {% if auction.top_bidder %}<span>· leader {{ auction.top_bidder.initials }}</span>{% endif %}
+      <span>· min next ${{ auction.next_min_bid|floatformat:0|intcomma }}</span>
+    </div>
+
+    <!-- Bid feed -->
+    <div class="mt-5 sheet rounded-xl overflow-hidden">
+      <div class="px-4 py-2 border-b border-line font-mono text-[.66rem] uppercase tracking-wide text-muted">Bid history</div>
+      <ul class="divide-y divide-line max-h-56 overflow-auto no-scrollbar font-mono text-sm">
+        {% for bid in bids %}
+        <li class="px-4 py-2.5 flex items-center justify-between {% if forloop.first %}bg-brand-50{% endif %}">
+          <span class="flex items-center gap-2 text-ink">
+            <span class="w-6 h-6 rounded-full bg-brand text-white text-[10px] grid place-items-center">{{ bid.user.initials }}</span>
+            {{ bid.user.username }}
+          </span>
+          <span class="text-ink font-600">${{ bid.amount|floatformat:0|intcomma }}</span>
+        </li>
+        {% empty %}
+        <li class="px-4 py-6 text-center text-muted text-sm font-sans">No bids yet — be the first.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

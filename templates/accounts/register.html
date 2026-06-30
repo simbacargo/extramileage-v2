@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Create account — {{ site.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-16">
+  <div class="text-center mb-8">
+    <span class="sun-dot inline-block"></span>
+    <h1 class="font-display font-700 text-3xl text-ink mt-4">Create your account</h1>
+    <p class="text-muted mt-1">Save vehicles, track inquiries and bid in live auctions.</p>
+  </div>
+  <form method="post" class="bg-surface sheet rounded-xl2 p-6 shadow-card grid sm:grid-cols-2 gap-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="sm:col-span-2 bg-accent-50 border border-accent/30 text-accent-600 text-sm rounded-lg px-4 py-3">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <div class="{% if field.name == 'username' or field.name == 'email' or field.name == 'message' %}sm:col-span-2{% endif %}">
+      <label class="block text-xs font-600 text-muted uppercase mb-1.5">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<p class="text-xs text-accent mt-1">{{ field.errors|striptags }}</p>{% endif %}
+      {% if field.help_text %}<p class="text-[.7rem] text-muted mt-1">{{ field.help_text|safe }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="sm:col-span-2 bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Create account</button>
+    <p class="sm:col-span-2 text-center text-sm text-muted">Already registered? <a href="{% url 'accounts:login' %}" class="text-brand font-600 hover:text-accent">Sign in</a></p>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  // style Django-rendered widgets to match
+  document.querySelectorAll('form input, form select, form textarea').forEach(el=>{
+    if(!el.className.includes('bg-paper')) el.className='w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400';
+  });
+</script>
+{% endblock %}

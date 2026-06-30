@@ -1,0 +1,148 @@
+{% load static humanize %}<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.site_name }} — {{ site.tagline }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ site.site_description }}{% endblock %}">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#F7F8FA',
+            surface: '#FFFFFF',
+            ink: '#0C1422',
+            muted: '#5B6675',
+            line: '#E6E9EE',
+            brand: { DEFAULT: '#0E2A47', 600: '#13355A', 400: '#2B5F95', 50: '#EEF3F9' },
+            accent: { DEFAULT: '#E4002B', 600: '#C30025', 50: '#FFEDF0' },
+          },
+          fontFamily: {
+            display: ['"Space Grotesk"', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace'],
+          },
+          fontWeight: { 400: '400', 500: '500', 600: '600', 700: '700' },
+          boxShadow: {
+            card: '0 1px 2px rgba(12,20,34,.04), 0 8px 24px rgba(12,20,34,.06)',
+            lift: '0 12px 40px rgba(12,20,34,.12)',
+          },
+          borderRadius: { xl2: '1.25rem' },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    body { background: var(--paper, #F7F8FA); color: #0C1422; font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+    .font-display { font-family: "Space Grotesk", sans-serif; }
+    .font-mono { font-family: "IBM Plex Mono", monospace; }
+
+    /* Rising-sun brand dot */
+    .sun-dot { width:.62rem; height:.62rem; border-radius:9999px; background:#E4002B; box-shadow:0 0 0 4px #FFEDF0; display:inline-block; }
+
+    /* hairline auction-sheet grid */
+    .sheet { border:1px solid #E6E9EE; }
+    .sheet-row { border-top:1px solid #E6E9EE; }
+
+    .hover-lift { transition: transform .25s ease, box-shadow .25s ease; }
+    .hover-lift:hover { transform: translateY(-4px); }
+
+    /* scroll reveal */
+    [data-reveal] { opacity:0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+    [data-reveal].in { opacity:1; transform:none; }
+
+    .tracking-eyebrow { letter-spacing:.18em; }
+    .underline-link { background-image: linear-gradient(#E4002B,#E4002B); background-size:0% 2px; background-repeat:no-repeat; background-position:0 100%; transition:background-size .3s ease; }
+    .underline-link:hover { background-size:100% 2px; }
+
+    /* range slider thumbs */
+    input[type=range]{ accent-color:#0E2A47; }
+
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .live-dot { animation: pulse-dot 1.4s infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal]{opacity:1;transform:none;transition:none}
+      .hover-lift,.live-dot{transition:none;animation:none}
+      html{scroll-behavior:auto}
+    }
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+
+    /* boosted-navigation progress bar */
+    #nprogress{position:fixed;top:0;left:0;height:2px;width:0;background:#E4002B;z-index:100;opacity:0;
+      box-shadow:0 0 8px rgba(228,0,43,.6);transition:width .35s ease,opacity .3s ease}
+    #nprogress.on{width:80%;opacity:1}
+    #nprogress.done{width:100%;opacity:0;transition:width .2s ease,opacity .4s ease .2s}
+    body.htmx-request{cursor:progress}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col" hx-boost="true">
+
+<div id="nprogress"></div>
+
+{% include "partials/header.html" %}
+
+<main class="flex-1">
+  {% if messages %}
+  <div class="fixed top-20 right-4 z-[60] space-y-2 w-[min(92vw,360px)]">
+    {% for m in messages %}
+    <div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,5000)" x-transition
+         class="sheet bg-surface shadow-lift rounded-xl px-4 py-3 flex items-start gap-3 text-sm
+                {% if m.tags == 'success' %}border-l-4 border-l-emerald-500{% elif m.tags == 'error' %}border-l-4 border-l-accent{% else %}border-l-4 border-l-brand{% endif %}">
+      <span class="flex-1 text-ink">{{ m }}</span>
+      <button @click="show=false" class="text-muted hover:text-ink">&times;</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% include "partials/footer.html" %}
+
+<script>
+  // Global UI behaviours — guarded so a boosted <body> swap doesn't re-bind listeners.
+  (function () {
+    // scroll reveal (re-armed after every swap; only observes un-revealed nodes)
+    const io = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+    window.__armReveal = () => document.querySelectorAll('[data-reveal]:not(.in)').forEach(el => io.observe(el));
+    window.__armReveal();
+
+    // live countdowns (single ticker for the whole app)
+    const fmt = (ms) => { if (ms <= 0) return 'ENDED'; const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (d ? d + 'd ' : '') + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+    window.__tickCountdowns = () => document.querySelectorAll('[data-countdown]').forEach(el => { el.textContent = '⏱ ' + fmt(new Date(el.dataset.countdown).getTime() - Date.now()); });
+
+    if (!window.__emInit) {
+      window.__emInit = true;
+      // header shadow on scroll (queries element each time so it survives swaps)
+      window.addEventListener('scroll', () => { const h = document.getElementById('site-header'); if (h) h.classList.toggle('scrolled', window.scrollY > 8); });
+      // single 1s countdown ticker
+      setInterval(() => window.__tickCountdowns(), 1000);
+      // progress bar + re-arm reveal/countdowns on boosted navigation
+      const bar = () => document.getElementById('nprogress');
+      document.addEventListener('htmx:beforeRequest', () => { const b = bar(); if (b) { b.classList.remove('done'); b.classList.add('on'); } });
+      document.addEventListener('htmx:afterRequest', () => { const b = bar(); if (b) { b.classList.remove('on'); b.classList.add('done'); } });
+      document.addEventListener('htmx:afterSwap', (e) => {
+        window.__armReveal(); window.__tickCountdowns();
+        if (e.detail && e.detail.target === document.body) window.scrollTo({ top: 0 });
+      });
+    }
+    window.__tickCountdowns();
+  })();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

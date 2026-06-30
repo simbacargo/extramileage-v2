@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Live Vehicle Auctions — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-brand text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+    <p class="flex items-center gap-2 font-mono text-xs tracking-eyebrow uppercase text-white/60"><span class="live-dot w-1.5 h-1.5 rounded-full bg-accent"></span> Auction house</p>
+    <h1 class="font-display font-700 text-4xl mt-2">Bid on vehicles, live</h1>
+    <p class="text-white/70 mt-2 max-w-xl">Real-time bidding on hand-selected stock straight from Japanese auctions. Place your bid and watch the feed update live.</p>
+    <div class="mt-7 inline-flex bg-white/10 rounded-lg p-1 font-600 text-sm">
+      <a href="?tab=live" class="px-4 py-2 rounded-md {% if tab == 'live' %}bg-white text-brand{% else %}text-white/80 hover:text-white{% endif %}">Live</a>
+      <a href="?tab=upcoming" class="px-4 py-2 rounded-md {% if tab == 'upcoming' %}bg-white text-brand{% else %}text-white/80 hover:text-white{% endif %}">Upcoming</a>
+      <a href="?tab=ended" class="px-4 py-2 rounded-md {% if tab == 'ended' %}bg-white text-brand{% else %}text-white/80 hover:text-white{% endif %}">Ended</a>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  {% if auctions %}
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for a in auctions %}
+    <a href="{{ a.get_absolute_url }}" class="group bg-surface sheet rounded-xl2 overflow-hidden shadow-card hover-lift">
+      <div class="relative aspect-[16/10] bg-paper">
+        {% if a.url %}<img src="{{ a.url }}" alt="{{ a.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">{% endif %}
+        {% if a.computed_status == 'live' %}<span class="absolute top-3 left-3 font-mono text-[10px] bg-accent text-white px-2 py-1 rounded-md flex items-center gap-1.5"><span class="live-dot w-1.5 h-1.5 rounded-full bg-white"></span>LIVE</span>
+        {% elif a.computed_status == 'ended' %}<span class="absolute top-3 left-3 font-mono text-[10px] bg-ink/80 text-white px-2 py-1 rounded-md">ENDED</span>
+        {% else %}<span class="absolute top-3 left-3 font-mono text-[10px] bg-brand text-white px-2 py-1 rounded-md">SOON</span>{% endif %}
+      </div>
+      <div class="p-5">
+        <h3 class="font-display font-600 text-ink truncate">{{ a.title }}</h3>
+        <div class="mt-3 flex items-end justify-between">
+          <div><p class="text-[.6rem] uppercase tracking-wide text-muted">Current bid</p><p class="font-mono font-700 text-xl text-ink">${{ a.current_bid|floatformat:0|intcomma }}</p></div>
+          <div class="text-right"><p class="text-[.6rem] uppercase tracking-wide text-muted">Bids</p><p class="font-mono text-ink">{{ a.total_bids }}</p></div>
+        </div>
+        <p class="mt-3 font-mono text-xs text-accent" data-countdown="{{ a.end_date|date:'c' }}">—</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-24 sheet rounded-xl2 bg-surface">
+    <p class="font-display font-600 text-xl text-ink">No {{ tab }} auctions right now</p>
+    <p class="text-muted mt-2">Check back soon or browse our standard inventory.</p>
+    <a href="{% url 'catalog:car_list' %}" class="inline-block mt-5 bg-brand text-white font-600 px-5 py-2.5 rounded-lg">Browse cars</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Profile — {{ site.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+  <h1 class="font-display font-700 text-3xl text-ink mb-6">Your profile</h1>
+  <form method="post" enctype="multipart/form-data" class="bg-surface sheet rounded-xl2 p-6 shadow-card grid sm:grid-cols-2 gap-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="{% if field.name == 'avatar' or field.name == 'email' %}sm:col-span-2{% endif %}">
+      <label class="block text-xs font-600 text-muted uppercase mb-1.5">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<p class="text-xs text-accent mt-1">{{ field.errors|striptags }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="sm:col-span-2 bg-brand hover:bg-brand-600 text-white font-600 py-3 rounded-lg">Save changes</button>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  document.querySelectorAll('form input, form select, form textarea').forEach(el=>{
+    if(el.type==='file'){ el.className='w-full text-sm text-muted file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand file:text-white file:font-600'; }
+    else { el.className='w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-400'; }
+  });
+</script>
+{% endblock %}

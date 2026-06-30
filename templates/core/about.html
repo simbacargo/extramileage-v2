@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}About — {{ site.site_name }}{% endblock %}
+{% block content %}
+<section class="bg-brand-50 border-b border-line">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
+    <p class="flex items-center justify-center gap-2 font-mono text-xs tracking-eyebrow uppercase text-muted"><span class="sun-dot"></span> Established in Tokyo</p>
+    <h1 class="font-display font-700 text-4xl sm:text-5xl text-ink mt-4">Cars from Japan,<br>trusted worldwide.</h1>
+    <p class="mt-5 text-muted text-lg max-w-2xl mx-auto">{{ site.site_name }} sources, inspects and exports quality Japanese vehicles to importers across {{ stats.countries_served }}+ countries — with transparent pricing and end-to-end logistics.</p>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="bg-surface sheet rounded-xl2 p-6 text-center"><p class="font-mono font-700 text-4xl text-brand">{{ stats.total_cars|intcomma }}+</p><p class="text-sm text-muted mt-1">Vehicles in stock</p></div>
+  <div class="bg-surface sheet rounded-xl2 p-6 text-center"><p class="font-mono font-700 text-4xl text-brand">{{ stats.total_brands }}</p><p class="text-sm text-muted mt-1">Brands represented</p></div>
+  <div class="bg-surface sheet rounded-xl2 p-6 text-center"><p class="font-mono font-700 text-4xl text-brand">{{ stats.years }}+</p><p class="text-sm text-muted mt-1">Years exporting</p></div>
+  <div class="bg-surface sheet rounded-xl2 p-6 text-center"><p class="font-mono font-700 text-4xl text-brand">{{ stats.countries_served }}+</p><p class="text-sm text-muted mt-1">Countries served</p></div>
+</section>
+
+<section class="max-w-5xl mx-auto px-4 sm:px-6 pb-8 grid md:grid-cols-2 gap-10 items-start">
+  <div>
+    <h2 class="font-display font-700 text-2xl text-ink">Why importers choose us</h2>
+    <p class="mt-3 text-muted leading-relaxed">We're a Tokyo-based exporter with direct access to Japan's largest used-vehicle auctions and dealer networks. Every unit is inspected and graded before it ships, so what you see is what arrives at your port.</p>
+  </div>
+  <ul class="space-y-3">
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">Direct auction &amp; dealer access across Japan</span></li>
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">Independent inspection grade on every unit</span></li>
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">Transparent FOB and CIF pricing — no surprises</span></li>
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">RoRo &amp; container shipping to any major port</span></li>
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">Full export documentation handled in-house</span></li>
+    <li class="flex gap-3"><span class="w-2 h-2 rounded-full bg-accent mt-2"></span><span class="text-ink">English-speaking support, one-day response</span></li>
+  </ul>
+</section>
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+  <div class="bg-brand text-white rounded-xl2 p-10 text-center">
+    <h2 class="font-display font-700 text-3xl">Ready to import from Japan?</h2>
+    <p class="mt-2 text-white/80">Browse live stock or tell us exactly what you're after.</p>
+    <div class="mt-6 flex justify-center gap-3 flex-wrap">
+      <a href="{% url 'catalog:car_list' %}" class="bg-white text-brand font-600 px-6 py-3 rounded-lg">Browse inventory</a>
+      <a href="{% url 'core:contact' %}" class="bg-accent hover:bg-accent-600 text-white font-600 px-6 py-3 rounded-lg">Contact us</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

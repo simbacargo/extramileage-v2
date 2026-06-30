@@ -1,0 +1,23 @@
+{% comment %}Reusable wishlist toggle. ctx: active, kind, obj_id, (optional) variant {% endcomment %}
+{% if user.is_authenticated %}
+<button id="wish-{{ kind }}-{{ obj_id }}"
+        hx-post="{% url 'accounts:toggle_wishlist' %}"
+        hx-vals='{"kind":"{{ kind }}","id":"{{ obj_id }}"}'
+        hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+        hx-swap="outerHTML"
+        aria-pressed="{{ active|yesno:'true,false' }}"
+        title="{% if active %}Remove from saved{% else %}Save vehicle{% endif %}"
+        class="group/w grid place-items-center w-9 h-9 rounded-full border backdrop-blur transition
+               {% if active %}bg-accent border-accent text-white{% else %}bg-white/90 border-line text-ink hover:border-accent hover:text-accent{% endif %}">
+  <svg class="w-[18px] h-[18px]" fill="{% if active %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M19 14c1.49-1.46 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.04 3 5.5l7 7Z"/>
+  </svg>
+</button>
+{% else %}
+<a href="{% url 'accounts:login' %}?next={{ request.path }}" title="Sign in to save"
+   class="grid place-items-center w-9 h-9 rounded-full border border-line bg-white/90 text-ink hover:text-accent hover:border-accent backdrop-blur transition">
+  <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M19 14c1.49-1.46 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.04 3 5.5l7 7Z"/>
+  </svg>
+</a>
+{% endif %}
