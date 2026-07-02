@@ -9,6 +9,7 @@ admin.site.index_title = "Marketplace administration"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/", include("api.urls")),
     path("", include("core.urls")),
     path("cars/", include("catalog.urls")),
     path("parts/", include("shop.urls")),

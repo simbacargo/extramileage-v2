@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Inquiry, User, Wishlist
+from .models import Inquiry, SavedSearch, User, Wishlist
 
 
 @admin.register(User)
@@ -21,3 +21,10 @@ class InquiryAdmin(admin.ModelAdmin):
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
     list_display = ("user", "car", "product", "created")
+
+
+@admin.register(SavedSearch)
+class SavedSearchAdmin(admin.ModelAdmin):
+    list_display = ("user", "name", "query", "alerts", "last_seen", "created")
+    list_filter = ("alerts", "created")
+    search_fields = ("name", "query", "user__username")

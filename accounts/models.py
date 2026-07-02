@@ -44,6 +44,26 @@ class Wishlist(models.Model):
         return f"{self.user} → {self.car or self.product}"
 
 
+class SavedSearch(models.Model):
+    """A stored car-filter query a user can re-run, with optional alerts for
+    newly listed cars that match it."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_searches")
+    name = models.CharField(max_length=120)
+    # Raw querystring as used by the /cars browse page, e.g. "brand=toyota&year_min=2015".
+    query = models.CharField(max_length=500, blank=True)
+    alerts = models.BooleanField(default=True, help_text="Notify about new cars matching this search.")
+    # Cars created after this are counted as "new matches"; reset when the user views them.
+    last_seen = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created"]
+        verbose_name_plural = "Saved searches"
+
+    def __str__(self):
+        return f"{self.user} — {self.name}"
+
+
 class Inquiry(models.Model):
     STATUS = [("new", "New"), ("in_progress", "In Progress"), ("closed", "Closed")]
 
