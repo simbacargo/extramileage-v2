@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-inter: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-space: "Space Grotesk", var(--font-inter);
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+body {
+  background: #F7F8FA;
+  color: #0C1422;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .sheet { @apply border border-line; }
+  .sheet-row { border-top: 1px solid #E6E9EE; }
+
+  .sun-dot {
+    width: .62rem; height: .62rem; border-radius: 9999px;
+    background: #E4002B; box-shadow: 0 0 0 4px #FFEDF0; display: inline-block;
+  }
+
+  .hover-lift { transition: transform .25s ease, box-shadow .25s ease; }
+  .hover-lift:hover { transform: translateY(-4px); }
+
+  .tracking-eyebrow { letter-spacing: .18em; }
+
+  .field {
+    @apply w-full bg-paper rounded-lg px-3 py-2.5 text-sm outline-none;
+    @apply focus:ring-2 focus:ring-brand-400;
+  }
+  .btn-primary { @apply bg-brand hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors; }
+  .btn-accent { @apply bg-accent hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors; }
+}
+
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+.live-dot { animation: pulse-dot 1.4s infinite; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* boosted-style top progress feel for route transitions is handled by Next automatically */
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift, .live-dot { transition: none; animation: none; }
+}
