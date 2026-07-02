@@ -1,4 +1,4 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.extramileage.com/api";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.extramileage.co.tz/api";
 
 type GetOpts = { revalidate?: number; token?: string | null };
 
